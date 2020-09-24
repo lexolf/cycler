@@ -20,9 +20,13 @@ def record_to_csv(file, filename, mode):
     df.reset_index(inplace=True, drop=True) # reset index so that it is cumulative throughout merged sheets
     if mode=="full":
         df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record'+'.csv', index=False, sep="\t") # save file
-    if mode=="compact": 
+    if mode=="compact":
+        df = df[['Cycle ID', 'Step ID', 'Time(H:M:S:ms)', 'RCap_Chg', 'RCap_DChg']]
+        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', index=False, sep="\t") # save file
+    if mode=="ultracompact": 
         df = df[['CmpCap', 'Vol', 'Step ID']] # save only 'main' columns
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_compact'+'.csv', index=False, sep="\t") # save file
+        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_ultracompact'+'.csv', index=False, sep="\t") # save file
+
     
 def cycle_to_csv(file, filename, mode):
     """Convert Cycle sheet to csv file"""
@@ -33,8 +37,11 @@ def cycle_to_csv(file, filename, mode):
     if mode=="full":
         df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle'+'.csv', index=False, sep="\t") # save file
     if mode=="compact":
-        df = df[['Cycle ID', 'RCap_Chg', 'RCap_DChg']]
+        df = df[['Cycle ID', 'Cap_Chg', 'Cap_DChg', 'RCap_Chg', 'RCap_DChg']]
         df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', index=False, sep="\t") # save file
+    if mode=="ultracompact":
+        df = df[['Cycle ID', 'RCap_Chg', 'RCap_DChg']]
+        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_ultracompact'+'.csv', index=False, sep="\t") # save file
 
 def xlsx_to_csv(file, mode="full"):
     """Convert xlsx of cycler data to text file"""
@@ -50,7 +57,7 @@ def send_files_to_converter(path=""):
     if path=="":
       path = os.listdir(pathlib.Path().absolute())
     for file in path:
-        xlsx_to_csv(file, mode="compact")
+        xlsx_to_csv(file, "compact")
 
 current_path_contents = os.listdir(pathlib.Path().absolute()) # get files in current folder
 send_files_to_converter(current_path_contents)
