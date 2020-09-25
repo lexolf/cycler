@@ -19,7 +19,7 @@ def record_to_csv(file, filename, mode):
             print("Skipping non-record sheet")
     df.reset_index(inplace=True, drop=True) # reset index so that it is cumulative throughout merged sheets
     if mode=="full":
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record'+'.csv', index=False, sep="\t") # save file
+        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_full'+'.csv', index=False, sep="\t") # save file
     if mode=="compact":
         df = df[['Cycle ID', 'Step ID', 'Time(H:M:S:ms)', 'RCap_Chg', 'RCap_DChg']]
         df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', index=False, sep="\t") # save file
@@ -35,7 +35,7 @@ def cycle_to_csv(file, filename, mode):
     df = df[1:] # remove first row 
     df.columns = header # set headers for columns
     if mode=="full":
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle'+'.csv', index=False, sep="\t") # save file
+        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_full'+'.csv', index=False, sep="\t") # save file
     if mode=="compact":
         df = df[['Cycle ID', 'Cap_Chg', 'Cap_DChg', 'RCap_Chg', 'RCap_DChg']]
         df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', index=False, sep="\t") # save file
@@ -43,7 +43,7 @@ def cycle_to_csv(file, filename, mode):
         df = df[['Cycle ID', 'RCap_Chg', 'RCap_DChg']]
         df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_ultracompact'+'.csv', index=False, sep="\t") # save file
 
-def xlsx_to_csv(file, mode="full"):
+def xlsx_to_csv(file, mode):
     """Convert xlsx of cycler data to text file"""
     filename, file_extension = os.path.splitext(file) 
     if file_extension == '.xlsx': # extract data only from xlsx files
@@ -57,7 +57,7 @@ def send_files_to_converter(path=""):
     if path=="":
       path = os.listdir(pathlib.Path().absolute())
     for file in path:
-        xlsx_to_csv(file, "compact")
+        xlsx_to_csv(file, "full")
 
 current_path_contents = os.listdir(pathlib.Path().absolute()) # get files in current folder
 send_files_to_converter(current_path_contents)
