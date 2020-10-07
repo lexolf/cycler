@@ -15,7 +15,8 @@ def plot_record(file, filename, graphs, interval, start, end):
     df = pd.read_csv(file, delimiter="\t")
     df = df.rename(columns={'Vol': 'Potential', 'Cur': 'Current', 'Cap': 'Capacity', 'CmpCap': 'Specific Capacity'})
     df_gcd = df[['Step ID', 'Current', 'Specific Capacity', 'Potential']]
-    df_gcd['Potential'] = df_gcd['Potential']/1000 # convert from mV to V 
+    if df_gcd['Potential'].max() > 100: # just a guess that hardly anyone uses the range over 100 V but less than 100 mV, seems like a nice compromise
+        df_gcd['Potential'] = df_gcd['Potential']/1000 # convert from mV to V if BTS exported mVs (it seems inconsistent)
     rest_steps = df_gcd[df_gcd['Current'] == 0].index # select rest steps
     df_gcd.drop(rest_steps, inplace=True) # drop rest steps
     steps = df_gcd['Step ID'].unique() ########  there are multiple cells with the same step like -2-2-2-...-4-4-4-...-6-6-6- (rest steps were dropped previously),
