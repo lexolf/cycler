@@ -3,12 +3,14 @@ import os
 import pathlib
 import matplotlib.pyplot as plt
 
-def plot_record(file, filename, graphs, interval=1, start=0, end=100):
-    """Plots GCD curves with parameters for cycles selection"""
-    ###___________________________________________________________________________###
-    ###__Caution: this will likely break if you have CC_CV steps in procedure!____###
-    ###___________Handling these procedures is planned for later__________________###
-    ###___________________________________________________________________________###
+def plot_record(file, filename, graphs, interval, start, end):
+    """Plots GCD curves"""
+    if interval == "":
+        interval = 1
+    if start == "":
+        start = 0
+    if end == "":
+        end = 100
     print("Plotting each " + str(interval) + " cycle of " + filename + " from " + str(start) + " to " + str(end) + " cycles.")
     df = pd.read_csv(file, delimiter="\t")
     df = df.rename(columns={'Vol': 'Potential', 'Cur': 'Current', 'Cap': 'Capacity', 'CmpCap': 'Specific Capacity'})
@@ -59,7 +61,10 @@ def csv_to_graph(file, graphs="all"):
     filename, file_extension = os.path.splitext(file) 
     if file_extension == '.csv': # extract data only from csv files
         if "record" in filename:
-            plot_record(file, filename, graphs, 1, 41, 50)
+            start = int(input("Enter the index of the first cycle to plot (press 'Enter' to use the default value 0)"))
+            end = int(input("Enter the index of the last cycle to plot  (press 'Enter' to use the default value 100)"))
+            interval = int(input("Enter the interval used for plotting cycles (press 'Enter' use the default value 1)"))
+            plot_record(file, filename, graphs, interval, start, end)
     else:
         print("Skipping non-csv file...")
 
