@@ -44,9 +44,13 @@ and I intend to add this functionality.
 
 There is no difference between scripts in .py filetype and Jupyter Notebook (which is easier for testing purposes and thus remains for my convenience).
 
+## plot_record.py
+
+The function plot_record is a modified one from plot.py script. The parameters **interval**, **start**, and **end** define the range of plotting cycles. 
+
 ## To-Dos
-1. Add an option to choose cycles by index for plotting recorded curves (avoid cluttering).
-2. Add an option to choose range of cycles for plotting cycle data (e.g., separate c-rate from record or exclude first cycles).
+1. ~~Add an option to choose cycles by index for plotting recorded curves (avoid cluttering).~~ [Done using parameters in plot_record.py]
+2. ~~Add an option to choose range of cycles for plotting cycle data (e.g., separate c-rate from record or exclude first cycles).~~ [Done using parameters in plot_record.py]
 3. Add functionality that auto-detects if the file is "resource"-type or "c-rate"-type and label the intervals on graphs accordingly. 
 4. Display the mass of electrodes on graph (maybe in title).
 5. Display the used current densities on graph (likely in legend).
