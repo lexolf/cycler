@@ -15,6 +15,14 @@ def record_to_csv(file, filename, mode):
             sheet.columns = header
             sheet = sheet[1:]              
             df = pd.concat([df, sheet], ignore_index=True, sort=False)
+        elif "Record" in f'{name}': # if it is a single record sheet, append it to the main DataFrame
+            header = sheet.iloc[0]
+            sheet.columns = header
+            sheet = sheet[1:]              
+            df = pd.concat([df, sheet], ignore_index=True, sort=False)
+        elif "record" in f'{name}': 
+            df = pd.concat([df, sheet], ignore_index=True, sort=False)
+            df = df.rename(columns={'Voltage': 'Vol', 'Current': 'Cur', 'Capacity': 'Cap', 'Capacity Density': 'CmpCap'}) # would rather work further with the same format
         else:
             print("Skipping non-record sheet")
     df.reset_index(inplace=True, drop=True) # reset index so that it is cumulative throughout merged sheets
@@ -30,10 +38,14 @@ def record_to_csv(file, filename, mode):
     
 def cycle_to_csv(file, filename, mode):
     """Convert Cycle sheet to csv file"""
-    df = pd.read_excel(file, sheet_name='Cycle') # read the sheet 'Cycle'
-    header = df.iloc[0]  # get header from first row
-    df = df[1:] # remove first row 
-    df.columns = header # set headers for columns
+    if file[-1] == "x":
+        df = pd.read_excel(file, sheet_name='Cycle') # read the sheet 'Cycle' in case of xlsx
+        header = df.iloc[0]  # get header from first row
+        df = df[1:] # remove first row 
+        df.columns = header # set headers for columns
+    elif file[-1] == "s":
+        df = pd.read_excel(file, sheet_name='cycle') # read the sheet 'cycle' in case of xls
+        df = df.rename(columns={'Specific Capacity-Chg': 'RCap_Chg', 'Specific Capacity-Dchg': 'RCap_DChg', 'Chg/DChg Efficiency': 'Efficiency'}) # would rather work further with the same format
     if mode=="full":
         df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_full'+'.csv', index=False, sep="\t") # save file
     if mode=="compact":
@@ -46,11 +58,11 @@ def cycle_to_csv(file, filename, mode):
 def xlsx_to_csv(file, mode):
     """Convert xlsx of cycler data to text file"""
     filename, file_extension = os.path.splitext(file) 
-    if file_extension == '.xlsx': # extract data only from xlsx files
+    if file_extension == '.xlsx' or file_extension == '.xls': # extract data only from xlsx files
         cycle_to_csv(file, filename, mode)
         record_to_csv(file, filename, mode)
     else:
-        print("This is not an xlsx file")
+        print("Skipping non-xlsx file...")
 
 def send_files_to_converter(path=""):
     """Convert each file in path"""
