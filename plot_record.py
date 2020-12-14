@@ -6,11 +6,17 @@ import matplotlib.pyplot as plt
 def plot_record(file, filename, graphs, interval, start, end):
     """Plots GCD curves"""
     if interval == "":
-        interval = 1
+        start = 0
+    else:
+        start = int(start)
     if start == "":
         start = 0
+    else:
+        start = int(start)
     if end == "":
         end = 100
+    else:
+        end = int(end)
     print("Plotting each " + str(interval) + " cycle of " + filename + " from " + str(start) + " to " + str(end) + " cycles.")
     df = pd.read_csv(file, delimiter="\t")
     df = df.rename(columns={'Vol': 'Potential', 'Cur': 'Current', 'Cap': 'Capacity', 'CmpCap': 'Specific Capacity'})
@@ -24,7 +30,7 @@ def plot_record(file, filename, graphs, interval, start, end):
     plt.style.use(['seaborn-colorblind', 'seaborn-paper'])
     graph = plt.figure()
     ax = graph.gca() # getting axes so they work as intended when plotting curves
-    graph_title = 'GCD Curves for cell ' + filename.split("_")[0]
+    graph_title = 'GCD Curves for cell ' + filename.split("_")[0] + " cycles from " + str(start) + " to " + str(end) + " each " + str(interval) + " cycle"
     i = 0 # to reindex steps 
     for step in steps: 
         i = i + 1 # indexing steps starting with 1
@@ -37,7 +43,7 @@ def plot_record(file, filename, graphs, interval, start, end):
         df_step['Step Type'] = step_type
         if i == 1:                          # set the type of first step for grouping (we may start with both charge and discharge steps)
             starting_step_type = df_step['Step Type'].iloc[0]
-        if df_step['Step ID'].iloc[0] >= start*2 and df_step['Step ID'].iloc[0] <= end*2: # limit what is the upper range of cycle number plotted; 
+        if df_step['Step ID'].iloc[0] >= (start-1)*2 and df_step['Step ID'].iloc[0] <= end*2: # limit what is the upper range of cycle number plotted; 
                                                                                         #doubled because each cycle contains 2 steps
             if df_step['Step Type'].iloc[0] == starting_step_type: # plotting curves of first step type
                 if((df_step['Step ID'].iloc[0]-1)%interval == 0): # -1 to take into account that we start from 1, not 0
@@ -62,9 +68,9 @@ def csv_to_graph(file, graphs="all"):
     filename, file_extension = os.path.splitext(file) 
     if file_extension == '.csv': # extract data only from csv files
         if "record" in filename:
-            start = int(input("Enter the index of the first cycle to plot (press 'Enter' to use the default value 0)"))
-            end = int(input("Enter the index of the last cycle to plot  (press 'Enter' to use the default value 100)"))
-            interval = int(input("Enter the interval used for plotting cycles (press 'Enter' use the default value 1)"))
+            start = input("Enter the index of the first cycle to plot (press 'Enter' to use the default value 0)")
+            end = input("Enter the index of the last cycle to plot  (press 'Enter' to use the default value 100)")
+            interval = input("Enter the interval used for plotting cycles (press 'Enter' use the default value 1)")
             plot_record(file, filename, graphs, interval, start, end)
     else:
         print("Skipping non-csv file...")
