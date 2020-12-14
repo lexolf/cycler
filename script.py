@@ -18,22 +18,35 @@ def record_to_csv(file, filename, mode):
         elif "Record" in f'{name}': # if it is a single record sheet, append it to the main DataFrame
             header = sheet.iloc[0]
             sheet.columns = header
-            sheet = sheet[1:]              
+            sheet = sheet[1:]               
+            df = pd.concat([df, sheet], ignore_index=True, sort=False)
+        elif "record_" in f'{name}':
             df = pd.concat([df, sheet], ignore_index=True, sort=False)
         elif "record" in f'{name}': 
             df = pd.concat([df, sheet], ignore_index=True, sort=False)
-            df = df.rename(columns={'Voltage': 'Vol', 'Current': 'Cur', 'Capacity': 'Cap', 'Capacity Density': 'CmpCap'}) # would rather work further with the same format
         else:
             print("Skipping non-record sheet")
+    df = df.rename(columns={'Voltage': 'Vol', 'Current': 'Cur', 'Capacity': 'Cap', 'Capacity Density': 'CmpCap'}) # would rather work further with the same format
     df.reset_index(inplace=True, drop=True) # reset index so that it is cumulative throughout merged sheets
-    if mode=="full":
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_full'+'.csv', index=False, sep="\t") # save file
-    if mode=="compact":
-        df = df[['Cycle ID', 'Step ID', 'Time(H:M:S:ms)', 'RCap_Chg', 'RCap_DChg']]
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', index=False, sep="\t") # save file
-    if mode=="ultracompact": 
-        df = df[['CmpCap', 'Vol', 'Step ID']] # save only 'main' columns
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_ultracompact'+'.csv', index=False, sep="\t") # save file
+    if "__" in filename:
+        filename = filename[:filename.index("__")]
+        if mode=="full":
+            df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_full'+'.csv', mode='a', header=False, index=False, sep="\t") # save file
+        if mode=="compact":
+            df = df[['Cycle ID', 'Step ID', 'Time(H:M:S:ms)', 'RCap_Chg', 'RCap_DChg']]
+            df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', mode='a', header=False, index=False, sep="\t") # save file
+        if mode=="ultracompact": 
+            df = df[['CmpCap', 'Vol', 'Step ID']] # save only 'main' columns
+            df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_ultracompact'+'.csv', mode='a', header=False, index=False, sep="\t") # save file
+    else:
+        if mode=="full":
+            df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_full'+'.csv', index=False, sep="\t") # save file
+        if mode=="compact":
+            df = df[['Cycle ID', 'Step ID', 'Time(H:M:S:ms)', 'RCap_Chg', 'RCap_DChg']]
+            df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', index=False, sep="\t") # save file
+        if mode=="ultracompact": 
+            df = df[['CmpCap', 'Vol', 'Step ID']] # save only 'main' columns
+            df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_record_ultracompact'+'.csv', index=False, sep="\t") # save file
 
     
 def cycle_to_csv(file, filename, mode):
@@ -44,23 +57,26 @@ def cycle_to_csv(file, filename, mode):
         df = df[1:] # remove first row 
         df.columns = header # set headers for columns
     elif file[-1] == "s":
-        df = pd.read_excel(file, sheet_name='cycle') # read the sheet 'cycle' in case of xls
-        df = df.rename(columns={'Specific Capacity-Chg': 'RCap_Chg', 'Specific Capacity-Dchg': 'RCap_DChg', 'Chg/DChg Efficiency': 'Efficiency'}) # would rather work further with the same format
-    if mode=="full":
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_full'+'.csv', index=False, sep="\t") # save file
-    if mode=="compact":
-        df = df[['Cycle ID', 'Cap_Chg', 'Cap_DChg', 'RCap_Chg', 'RCap_DChg']]
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', index=False, sep="\t") # save file
-    if mode=="ultracompact":
-        df = df[['Cycle ID', 'RCap_Chg', 'RCap_DChg']]
-        df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_ultracompact'+'.csv', index=False, sep="\t") # save file
+        xl = pd.ExcelFile(file)
+        if 'cycle' in xl.sheet_names:
+            df = pd.read_excel(file, sheet_name='cycle') # read the sheet 'cycle' in case of xls
+            df = df.rename(columns={'Specific Capacity-Chg': 'RCap_Chg', 'Specific Capacity-Dchg': 'RCap_DChg', 'Chg/DChg Efficiency': 'Efficiency'}) # would rather work further with the same format
+            if mode=="full":
+                df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_full'+'.csv', index=False, sep="\t") # save file
+            if mode=="compact":
+                df = df[['Cycle ID', 'Cap_Chg', 'Cap_DChg', 'RCap_Chg', 'RCap_DChg']]
+                df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_compact'+'.csv', index=False, sep="\t") # save file
+            if mode=="ultracompact":
+                df = df[['Cycle ID', 'RCap_Chg', 'RCap_DChg']]
+                df.to_csv(os.path.join(pathlib.Path().absolute(),filename)+'_cycle_ultracompact'+'.csv', index=False, sep="\t") # save file
+            
 
 def xlsx_to_csv(file, mode):
     """Convert xlsx of cycler data to text file"""
     filename, file_extension = os.path.splitext(file) 
     if file_extension == '.xlsx' or file_extension == '.xls': # extract data only from xlsx files
         cycle_to_csv(file, filename, mode)
-        record_to_csv(file, filename, mode)
+        # record_to_csv(file, filename, mode)
     else:
         print("Skipping non-xlsx file...")
 
