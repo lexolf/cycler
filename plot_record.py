@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 def plot_record(file, filename, graphs, interval, start, end):
     """Plots GCD curves"""
     if interval == "":
-        start = 0
+        interval = 1
     else:
-        start = int(start)
+        interval = int(interval)
     if start == "":
         start = 0
     else:
@@ -68,9 +68,9 @@ def csv_to_graph(file, graphs="all"):
     filename, file_extension = os.path.splitext(file) 
     if file_extension == '.csv': # extract data only from csv files
         if "record" in filename:
-            start = input("Enter the index of the first cycle to plot (press 'Enter' to use the default value 0)")
-            end = input("Enter the index of the last cycle to plot  (press 'Enter' to use the default value 100)")
-            interval = input("Enter the interval used for plotting cycles (press 'Enter' use the default value 1)")
+            start = int(input("Enter the index of the first cycle to plot (press 'Enter' to use the default value 0)"))
+            end = int(input("Enter the index of the last cycle to plot  (press 'Enter' to use the default value 100)"))
+            interval = int(input("Enter the interval used for plotting cycles (press 'Enter' use the default value 1)"))
             plot_record(file, filename, graphs, interval, start, end)
     else:
         print("Skipping non-csv file...")
